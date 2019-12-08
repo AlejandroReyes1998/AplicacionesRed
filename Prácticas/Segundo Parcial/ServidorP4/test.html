@@ -1,0 +1,225 @@
+<html>
+  <head>
+    <title></title>
+    <meta content="">
+    <style></style>
+    <script type='text/javascript' src='fabric.min.js'></script>
+    <script type='text/javascript' src='jquery.min.js'></script>
+
+  </head>
+  <body>
+  	<div id="images">
+    <img draggable="true" src="perro.jpg" width="100" height="100"></img>
+    <img draggable="true" src="https://pbs.twimg.com/profile_images/725013638411489280/4wx8EcIA_400x400.jpg" width="100" height="100"></img>
+    <img draggable="true" src="https://previews.123rf.com/images/rastudio/rastudio1604/rastudio160408438/55193519-antecedentes-de-vector-de-paisaje-de-monta%C3%B1a-ilustraci%C3%B3n-dise%C3%B1o-plano-de-planta-cuadrada-.jpg" width="100" height="100"></img>
+    <img draggable="true" src="https://cdn.shopify.com/s/files/1/0743/4993/products/Mowgli_Banco_de_Madera_y_Herreria_-_Varios_Colores_2_1024x1024.png?v=1477937433" width="100" height="100"></img>
+    <img draggable="true" src="http://t1.gstatic.com/images?q=tbn:ANd9GcR2v4j1OCJN5ghI2C9-iYLeM0GLuQ4lCqPDDPCgKV6J_OHKEEWk" width="100" height="100"></img>
+    <img draggable="true" src="https://png.icons8.com/metro/1600/resize-vertical.png" width="100" height="100"></img>
+</div>
+	
+<div id="canvas-container">
+	
+    <canvas id="canvas" width="800" height="800" style="border:1px solid #000000;"></canvas>
+    <script>
+    var imageLoader = document.getElementById('imageLoader');
+        //Declaramos las imagenes para el canvas
+    var canvas = new fabric.Canvas('canvas');
+    function handleDragStart(e) {
+    		[].forEach.call(images, function (img) {
+        	img.classList.remove('img_dragging');
+    		});
+    		this.classList.add('img_dragging');
+		}
+
+	function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault(); // Permite drop
+    }
+    e.dataTransfer.dropEffect = 'copy'; 
+    return false;
+	}
+
+function handleDragEnter(e) {
+    // Elemento que entra al cabvas
+    this.classList.add('over');
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('over'); // Elemento anterior
+}
+
+function handleDrop(e) {
+    // Elemento actual
+    if (e.stopPropagation) {
+        e.stopPropagation(); // Detiene redireccionamientos
+    }
+    //Imagenes Drag And Dróp
+    var img = document.querySelector('#images img.img_dragging ');
+    console.log('event: ', e);
+    var newImage = new fabric.Image(img,{
+        width: 100,
+        height: 100,
+        left: e.layerX,
+        top: e.layerY
+        
+    });
+    var widthO = img.naturalWidth;
+    var heightO = img.naturalHeight;
+    var sx = widthO/833.3333;
+        newImage.set({
+            width: widthO,
+            height: heightO,
+            scaleX: .23,
+            scaleY: .23,
+            left: e.layerX,
+            top: e.layerY,
+          });
+        canvas.add(newImage);
+        return false;
+    }
+    function handleDragEnd(e) {
+        // Deja el objeto donde el cursor
+        [].forEach.call(images, function (img) {
+            img.classList.remove('img_dragging');
+        });
+    }
+    //Removedor de objetos
+    var bin;
+    var selectedObject;
+    fabric.Image.fromURL('descarga.png', function(img2) {
+    img2.set({
+        width: 200,
+        height: 200,
+        left: 720,
+        top: 720,
+        selectable: false
+      });
+      bin = img2;
+      canvas.add(img2);
+    });
+    canvas.on('object:selected', function(evn) {
+      selectedObject = evn.target;
+    })
+    canvas.on('mouse:up', function(evn) {
+      var x = evn.e.offsetX;
+      var y = evn.e.offsetY;
+      if (x > bin.left && x < (bin.left + bin.width) && y > bin.top && y < (bin.top + bin.height)||(x < bin.left && x > (bin.left + bin.width))&& (y < bin.top && y > (bin.top + bin.height))) {
+        canvas.remove(selectedObject);
+      }
+    });
+   	
+
+canvas.uniScaleTransform = true;
+
+var appObject = function() {
+
+  return {
+    __canvas: canvas,
+    __tmpgroup: {},
+
+    addText: function() {
+      var newID = (new Date()).getTime().toString().substr(5);
+      var text = new fabric.IText('ejemplo', {
+        fontFamily: 'arial black',
+        left: 500,
+        top: 500,
+        myid: newID,
+        objecttype: 'text'
+      });
+
+      this.__canvas.add(text);
+      this.addLayer(newID, 'text');
+    },
+    setTextParam: function(param, value) {
+      var obj = this.__canvas.getActiveObject();
+      if (obj) {
+        if (param == 'color') {
+          obj.setColor(value);
+        } else {
+          obj.set(param, value);
+        }
+        this.__canvas.renderAll();
+      }
+    },
+    setTextValue: function(value) {
+      var obj = this.__canvas.getActiveObject();
+      if (obj) {
+        obj.setText(value);
+        this.__canvas.renderAll();
+      }
+    },
+    addLayer: function() {
+
+    }
+
+  };
+}
+//ajax que cambia el texto seleccionado
+$(document).ready(function() {
+
+  var app = appObject();
+
+  $('.font-change').change(function(event) {
+    app.setTextParam($(this).data('type'), $(this).find('option:selected').val());
+  });
+
+  $('#add').click(function() {
+    app.addText();
+  });
+})
+
+
+	$("canvas").click(function(e){
+			  var txt = canvas.getActiveObject().text;
+			  Decir(txt);
+			});
+
+			function Decir(say){
+				var voicelist = responsiveVoice.getVoices();
+				responsiveVoice.speak(say,"Spanish Latin American Female");
+			}
+
+    //Añadimos los eventos de drag and drop a las imagenes
+    var images = document.querySelectorAll('#images img');
+    [].forEach.call(images, function (img) {
+        img.addEventListener('dragstart', handleDragStart, false);
+        img.addEventListener('dragend', handleDragEnd, false);
+    });
+    // Añadimos el soporte de eventos al canvas
+    var canvasContainer = document.getElementById('canvas-container');
+    canvasContainer.addEventListener('dragenter', handleDragEnter, false);
+    canvasContainer.addEventListener('dragover', handleDragOver, false);
+    canvasContainer.addEventListener('dragleave', handleDragLeave, false);
+    canvasContainer.addEventListener('drop', handleDrop, false);
+
+    </script>
+    <button id="add" type="button">Añadir</button>
+	<select class="select2 font-change" data-type="fontFamily">
+  		<option value="Arial">Arial</option>
+  		<option value="Arial Black">Arial Black</option>
+  		<option value="Times New Roman">Times New Roman</option>
+  		<option value="Helvetica">Helvetica</option>
+  		<option value="Courier New">Courier New</option>
+	</select>
+	<select class="select2 font-change" data-type="fontSize">
+	  <option value="10">10</option>
+	  <option value="12">12</option>
+	  <option value="14">14</option>
+	  <option value="16">16</option>
+	  <option value="18">18</option>
+	  <option value="20">20</option>
+	  <option value="24">24</option>
+	  <option value="32">32</option>
+	</select>
+	<select class="select2 font-change" data-type="color">
+	  <option value="#000">Negro</option>
+	  <option value="#00f">Azul</option>
+	  <option value="#0f0">Verde</option>
+	  <option value="#f00">Rojo</option>
+	  <option value="#f0f">Rosa</option>
+	  <option value="#ff7800">Naranja</option>
+	  <option value="#822982">Morado</option>
+	</select>
+</div>
+  </body>
+</html>

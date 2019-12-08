@@ -1,0 +1,601 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "pila.h"
+
+
+
+mensaje push(NODO **p,NODO w);
+NODO pop(NODO **p);
+NODO top(NODO *p);
+boolean empty(NODO *p);
+
+void ini_pila(NODO **p);
+void free_pila(NODO **p);
+
+
+int main() {
+	
+
+	//ARCHIVOS QUE SE USARAN EN TODO EL PROGRAMA
+	FILE *archivo1,*list;
+	
+	NODO w,n1,n2,extra;
+	NODO *p1;	//pila
+	NODO *p2;
+	
+	ini_pila(&p1);
+	ini_pila(&p2);
+
+	char c;
+	int linea=1,i=0,opt,jera1,jera2,e,n,ERROR=0,INDE=0,AUXI=0;
+	float num1;
+
+	//Abriendo archivo 1
+					{	
+						archivo1=fopen("archivo1.txt","r");
+						if(archivo1==NULL)
+						{
+							printf("\nNo existe el archivo 1.txt");
+							return 0;
+						}
+					}
+
+	//lee o crea un archivo numero 2 para guardar la expresion infija en postfija
+						{	
+						list=fopen("LISTA.txt","r");			
+						if(list==NULL)
+						{
+								list=fopen("LISTA.txt","w");
+								if(list==NULL)
+								{
+									printf("\nError al crear el archivo");
+									system("PAUSE");
+									exit(1);
+								}		
+						}
+						else
+						remove("LISTA.txt");
+						list=fopen("LISTA.txt","w");
+						list=fopen("LISTA.txt","a");
+						if(list==NULL)
+								{
+									printf("\nError al crear el archivo");
+									system("PAUSE");
+									exit(1);
+								}	
+						}	
+					
+		///Primero verifica los parentesis balanceados
+							
+		printf("\nAnalizando archivo\n");	
+					
+					while(c!='\377')
+					{
+						c=fgetc(archivo1);
+						switch(c)
+						{
+							case '\377':
+								n=empty(p1);
+								if (n==FALSE)
+								{
+								printf("\nFalto cierre de la linea %d",top(p1).dato2);
+								ERROR=1;
+								}
+								break;
+							
+							case '{':
+								w.dato1=c;
+								w.dato2=linea;
+								push(&p1,w);
+								break;
+							case '}':
+								n=empty(p1);
+								if (n==TRUE)
+								{
+									printf("\nFalto apertura con el tipo } de linea %d",linea);
+									ERROR=1;
+								}
+								else	if(top(p1).dato1=='{')
+								{
+									pop(&p1);
+								}
+								else if(top(p1).dato1!='{')
+								{
+									printf("\nTipos incompatibles");
+									printf("\nError en lineas: %d y %d",top(p1).dato2,linea);
+									ERROR=1;
+									return 0;
+								}
+								break;
+							case '(':
+								w.dato1=c;
+								w.dato2=linea;
+								push(&p1,w);
+								break;
+								
+							case ')':
+								n=empty(p1);
+								if (n==TRUE)
+								{
+									printf("\nFalto apertura con el tipo ) de linea %d",linea);
+									ERROR=1;
+								}
+								else if(top(p1).dato1=='(')
+								{
+									pop(&p1);
+								}
+								else if(top(p1).dato1!='(')
+								{
+									printf("\nTipos incompatibles");
+									printf("\nError en lineas: %d y %d",top(p1).dato2,linea);
+									ERROR=1;
+									return 0;
+								}
+								break;		
+								
+							case '[':
+								w.dato1=c;
+								w.dato2=linea;
+								push(&p1,w);
+								break;
+								
+							case ']':
+								n=empty(p1);
+								if (n==TRUE)
+								{
+									printf("\nFalto apertura con el tipo ] de linea %d",linea);
+									ERROR=1;
+								}
+								else if(top(p1).dato1=='[')
+								{
+									pop(&p1);
+								}
+								else if(top(p1).dato1!='[')
+								{
+									printf("\nTipos incompatibles");
+									printf("\nError en lineas: %d y %d",top(p1).dato2,linea);
+									ERROR=1;
+									return 0;
+								}
+								break;		
+								
+							case '<':
+								w.dato1=c;
+								w.dato2=linea;
+								push(&p1,w);
+								break;
+							case '>':
+								n=empty(p1);
+								if (n==TRUE)
+								{
+									printf("\nFalto apertura con el tipo > de linea %d",linea);
+									ERROR=1;
+								}
+								else	if(top(p1).dato1=='<')
+								{
+									pop(&p1);
+								}
+								else if(top(p1).dato1!='<')
+								{
+									printf("\nTipos incompatibles");
+									printf("\nError en lineas: %d y %d",top(p1).dato2,linea);
+									ERROR=1;
+									return 0;
+								}
+								break;
+					
+							
+								
+
+								
+						
+							case '\n':
+								linea++;
+								break;
+								
+						}
+						
+						
+					}
+				
+
+
+///Fin de comprobacion de parentesis
+
+fclose(archivo1);
+
+archivo1=fopen("archivo1.txt","r");
+
+if (ERROR==0){
+
+	printf("Sintaxis correcta!, realizando operaciones... \n");
+	printf("Evaluando expresion: ");
+	c=fgetc(archivo1);
+				while(c!='\377'){
+					if(c=='(')
+					{
+						w.dato1=c;
+						push(&p1,w);	
+						
+					}
+					else if(c==')')
+					{
+							if(top(p1).dato1=='(')
+							w=pop(&p1);	
+					}
+				
+					else if((c=='0')||(c=='1')||(c=='2')||(c=='3')||(c=='4')||(c=='5')||(c=='6')||(c=='7')||(c=='8')||(c=='9'))
+					{
+						fprintf(list,"%c",c);
+					}
+	
+					else if((c=='+')||(c=='-'))
+					{
+						fprintf(list," ");
+
+						jera1=1;
+						e=empty(p1);
+						if ((e==TRUE)||(top(p1).dato1=='('))
+						{
+							w.dato1=c;
+							w.dato2=jera1;
+							push(&p1,w);	
+						}
+						else if (e==FALSE)
+						{
+							
+								if(top(p1).dato2==jera1)
+								{
+									w=pop(&p1);
+									fprintf(list,"%c",w.dato1);
+									w.dato1=c;
+									w.dato2=jera1;
+									push(&p1,w);
+									
+								}
+								else if(top(p1).dato2>jera1)
+								{
+									e=empty(p1);
+									while ((e==FALSE)&&(top(p1).dato1!='('))
+									{
+										w=pop(&p1);
+										fprintf(list,"%c",w.dato1);
+										e=empty(p1);
+									}
+									w.dato1=c;
+									w.dato2=jera1;
+									push(&p1,w);
+								}
+								else if(top(p1).dato2<jera1)
+								{
+									w.dato1=c;
+									w.dato2=jera1;
+									push(&p1,w);
+									
+								}
+						}
+						
+
+						
+					}
+					else if((c=='*')||(c=='/'))
+					{
+
+						fprintf(list," ");
+						
+						jera2=2;
+						e=empty(p1);
+						if ((e==TRUE)||(top(p1).dato1=='('))
+						{
+							w.dato1=c;
+							w.dato2=jera2;
+							push(&p1,w);	
+						}
+						else if (e==FALSE)
+						{
+							
+								if(top(p1).dato2==jera2)
+								{
+									w=pop(&p1);
+									fprintf(list,"%c",w.dato1);
+									w.dato1=c;
+									w.dato2=jera2;
+									push(&p1,w);
+									
+								}
+								else if(top(p1).dato2>jera2)
+								{
+									e=empty(p1);
+									while ((e==FALSE)&&(top(p1).dato1!='('))
+									{
+										w=pop(&p1);
+										fprintf(list,"%c",w.dato1);
+										e=empty(p1);
+									}
+									w.dato1=c;
+									w.dato2=jera2;
+									push(&p1,w);
+								}
+								else if(top(p1).dato2<jera2)
+								{
+									w.dato1=c;
+									w.dato2=jera2;
+									push(&p1,w);
+									
+								}
+						}
+						
+					}
+					
+
+		
+					printf("%c",c);
+					c=fgetc(archivo1);
+					
+					if(c==')')
+					{
+						while (top(p1).dato1!='(')
+						{
+						w=pop(&p1);
+						fprintf(list,"%c",w.dato1);
+						e=empty(p1);
+						c=')';
+						}	
+					}
+					
+					if((c=='\n')||(c=='\377'))
+					{
+						e=empty(p1);
+						while (e==FALSE)
+						{
+						w=pop(&p1);
+						fprintf(list,"%c",w.dato1);
+						e=empty(p1);
+						c='\377';
+						}
+							
+						break;
+					}
+									
+				}
+
+//Realizando la operacion
+
+fclose(list);
+	
+list=fopen("LISTA.txt","r");
+
+						w.dato1='v';
+						push(&p1,w);
+	
+	c='a';
+	while(c!='\377')
+	{
+				
+				if((c=='0')||(c=='1')||(c=='2')||(c=='3')||(c=='4')||(c=='5')||(c=='6')||(c=='7')||(c=='8')||(c=='9'))
+					{
+						AUXI=0;
+						num1=(int)(c-48);
+						w.dato2=num1;
+						w.dato1='a';
+						push(&p1,w);
+					}
+				else if(c=='+')
+					{
+						AUXI=0;
+						n2=pop(&p1);
+						if (top(p1).dato1=='a')
+						{
+							extra=pop(&p1);
+							n2.dato2=(extra.dato2*10)+(n2.dato2);
+
+							if (top(p1).dato1=='e')
+							{
+								pop(&p1);
+							}
+
+
+						}else if (top(p1).dato1=='e')
+						{
+							pop(&p1);
+						}
+
+						n1=pop(&p1);
+						if (top(p1).dato1=='a')
+						{
+							extra=pop(&p1);
+							n1.dato2=(extra.dato2*10)+(n1.dato2);
+
+							if (top(p1).dato1=='e')
+							{
+								pop(&p1);
+							}
+
+
+						}else if (top(p1).dato1=='e')
+						{
+							pop(&p1);
+						}
+						n1.dato2=n1.dato2+n2.dato2;
+						n1.dato1='a';
+						push(&p1,n1);
+					}
+				else if(c=='-')
+					{
+						AUXI=0;
+						n2=pop(&p1);
+						if (top(p1).dato1=='a')
+						{
+							extra=pop(&p1);
+							n2.dato2=(extra.dato2*10)+(n2.dato2);
+
+							if (top(p1).dato1=='e')
+							{
+								pop(&p1);
+							}
+
+
+						}else if (top(p1).dato1=='e')
+						{
+							pop(&p1);
+						}
+
+						n1=pop(&p1);
+						if (top(p1).dato1=='a')
+						{
+							extra=pop(&p1);
+							n1.dato2=(extra.dato2*10)+(n1.dato2);
+
+							if (top(p1).dato1=='e')
+							{
+								pop(&p1);
+							}
+
+
+						}else if (top(p1).dato1=='e')
+						{
+							pop(&p1);
+						}
+
+
+						n1.dato2=n1.dato2-n2.dato2;
+						n1.dato1='a';
+						push(&p1,n1);
+					}
+				else if(c=='*')
+					{
+						AUXI=0;
+						n2=pop(&p1);
+						if (top(p1).dato1=='a')
+						{
+							extra=pop(&p1);
+							n2.dato2=(extra.dato2*10)+(n2.dato2);
+
+							if (top(p1).dato1=='e')
+							{
+								pop(&p1);
+							}
+
+						}else if (top(p1).dato1=='e')
+						{
+							pop(&p1);
+						}
+
+						n1=pop(&p1);
+						if (top(p1).dato1=='a')
+						{
+							extra=pop(&p1);
+							n1.dato2=(extra.dato2*10)+(n1.dato2);
+
+							if (top(p1).dato1=='e')
+							{
+								pop(&p1);
+							}
+
+
+						}else if (top(p1).dato1=='e')
+						{
+							pop(&p1);
+						}
+						n1.dato2=n1.dato2*n2.dato2;
+						n1.dato1='a';
+						push(&p1,n1);
+					}
+				else if(c=='/')
+					{
+						AUXI=0;
+						n2=pop(&p1);
+						if (top(p1).dato1=='a')
+						{
+							extra=pop(&p1);
+							n2.dato2=(extra.dato2*10)+(n2.dato2);
+
+							if (top(p1).dato1=='e')
+							{
+								pop(&p1);
+							}
+
+
+						}else if (top(p1).dato1=='e')
+						{
+							pop(&p1);
+						}
+
+						n1=pop(&p1);
+						if (top(p1).dato1=='a')
+						{
+							extra=pop(&p1);
+							n1.dato2=(extra.dato2*10)+(n1.dato2);
+
+							if (top(p1).dato1=='e')
+							{
+								pop(&p1);
+							}
+
+
+						}else if (top(p1).dato1=='e')
+						{
+							pop(&p1);
+						}
+						n1.dato2=n1.dato2/n2.dato2;
+						n1.dato1='a';
+						push(&p1,n1);
+					}
+				else if(c==' ')
+					{
+						AUXI=0;
+						w.dato1='e'; //e de espacio
+						push(&p1,w);
+					}
+
+			
+			if(AUXI==0)
+			{
+					c=fgetc(list);
+			}
+			
+	}
+
+	fclose(list);
+	
+	
+	n1=pop(&p1);
+	
+	if(INDE==0)
+	{
+		printf("\n\nEl resultado es: ");
+	{
+		printf("%.d \n\n",n1.dato2);
+	}
+	
+	//remove("LISTA.txt");
+	//list=fopen("LISTA.txt","w");
+	//list=fopen("LISTA.txt","a");
+
+	AUXI=0;
+	INDE=0;
+	
+	}
+	else if(INDE==1)
+	{
+			printf("\n\n\t\tEl resultado es un valor indeterminado");
+		
+			
+	//remove("LISTA.txt");
+	//list=fopen("LISTA.txt","w");
+	//list=fopen("LISTA.txt","a");
+
+	AUXI=0;
+	INDE=0;
+	}
+	
+
+	
+}
+
+return 0;
+
+}
+
+ 
